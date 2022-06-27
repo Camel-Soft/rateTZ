@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph_main"
+    app:startDestination="@id/fragGraphRate">
+
+    <fragment
+        android:id="@+id/fragGraphRate"
+        android:name="com.camelsoft.ratetz._presentation.activity_main.fragment_rate.FragmentRate"
+        android:label="@string/rate"
+        tools:layout="@layout/fragment_rate" >
+        <action
+            android:id="@+id/action_fragGraphRate_to_fragGraphFav"
+            app:destination="@id/fragGraphFav" />
+        <action
+            android:id="@+id/action_fragGraphRate_to_fragGraphSort"
+            app:destination="@id/fragGraphSort" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragGraphSort"
+        android:name="com.camelsoft.ratetz._presentation.activity_main.fragment_sort.FragmentSort"
+        android:label="@string/sort"
+        tools:layout="@layout/fragment_sort" >
+        <action
+            android:id="@+id/action_fragGraphSort_to_fragGraphRate"
+            app:destination="@id/fragGraphRate" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragGraphFav"
+        android:name="com.camelsoft.ratetz._presentation.activity_main.fragment_fav.FragmentFav"
+        android:label="@string/fav"
+        tools:layout="@layout/fragment_fav" >
+        <action
+            android:id="@+id/action_fragGraphFav_to_fragGraphRate"
+            app:destination="@id/fragGraphRate" />
+    </fragment>
+
+</navigation>
