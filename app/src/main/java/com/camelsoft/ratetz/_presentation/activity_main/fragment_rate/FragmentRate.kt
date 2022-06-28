@@ -11,13 +11,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.camelsoft.ratetz._domain.models.MRateRv
-import com.camelsoft.ratetz._domain.models.toCurrencyList
-import com.camelsoft.ratetz._domain.models.toRatesList
+import com.camelsoft.ratetz._domain.models.*
 import com.camelsoft.ratetz._presentation.utils.dialogs.showError
 import com.camelsoft.ratetz.databinding.FragmentRateBinding
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
+import java.util.*
 
 @AndroidEntryPoint
 class FragmentRate : Fragment() {
@@ -42,6 +41,18 @@ class FragmentRate : Fragment() {
         btnRefresh()
         chargeRv()
 
+
+
+
+        binding.btnSort.setOnClickListener {
+
+        }
+
+
+
+
+
+
         viewModel.rate.observe(viewLifecycleOwner) {
             invokeSpinner(it.toCurrencyList())
             invokeRv(it.toRatesList())
@@ -51,6 +62,7 @@ class FragmentRate : Fragment() {
     }
 
     private fun invokeRv(list: List<MRateRv>) {
+        Collections.sort(list, rateDesc)
         adapterRv.submitList(list)
     }
 

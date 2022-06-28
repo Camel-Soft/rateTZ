@@ -15,7 +15,7 @@ fun MRate.toRatesList(): List<MRateRv> {
         list.add(
             MRateRv(
                 name = name,
-                rate = floatToString(rate, 4),
+                rate = floatToString(rate, 4, '.'),
                 isSelected = false
             )
         )
