@@ -1,7 +1,9 @@
 package com.camelsoft.ratetz.common.di
 
 import com.camelsoft.ratetz._data.net.RateApi
+import com.camelsoft.ratetz._data.net.RateRepositoryImpl
 import com.camelsoft.ratetz._data.net.addLoggingInterceptor
+import com.camelsoft.ratetz._domain.repository.RateRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,5 +36,11 @@ object DataModuleSingl {
     @Singleton
     fun provideRateApi(retrofit: Retrofit): RateApi {
         return retrofit.create(RateApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideRateRepository(rateApi: RateApi): RateRepository {
+        return RateRepositoryImpl(rateApi)
     }
 }

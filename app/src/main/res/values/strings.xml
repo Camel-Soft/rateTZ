@@ -8,6 +8,7 @@
     <string name="fav">Избранное</string>
     <string name="rate">Курс</string>
     <string name="sort">Сортировка</string>
+    <string name="select">Избранное</string>
 
     <string name="error">Ошибка</string>
     <string name="error_in">Ошибка в</string>

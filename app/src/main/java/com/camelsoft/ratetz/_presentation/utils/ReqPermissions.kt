@@ -3,7 +3,7 @@ package com.camelsoft.ratetz._presentation.utils
 import android.Manifest
 import android.content.Context
 import com.camelsoft.ratetz.R
-import com.camelsoft.ratetz.common.events.EventsSync
+import com.camelsoft.ratetz.common.state.StateSync
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -11,7 +11,7 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import java.lang.Exception
 
-fun reqPermissions(context: Context, report: (EventsSync<Boolean>) -> Unit) {
+fun reqPermissions(context: Context, report: (StateSync<Boolean>) -> Unit) {
     try {
         Dexter.withContext(context)
             .withPermissions(
@@ -23,9 +23,9 @@ fun reqPermissions(context: Context, report: (EventsSync<Boolean>) -> Unit) {
                 override fun onPermissionsChecked(permReport: MultiplePermissionsReport?) {
                     permReport?.let {
                         if(permReport.areAllPermissionsGranted())
-                            report(EventsSync.Success<Boolean>(true))
+                            report(StateSync.Success<Boolean>(true))
                         else
-                            report(EventsSync.Success<Boolean>(false))
+                            report(StateSync.Success<Boolean>(false))
                     }
                 }
 
@@ -37,7 +37,7 @@ fun reqPermissions(context: Context, report: (EventsSync<Boolean>) -> Unit) {
             .withErrorListener {
                 val errMessage = context.resources.getString(R.string.error_in)+
                         " ReqPermissions.DexterError: ${it.name}"
-                report(EventsSync.Error<Boolean>(errMessage))
+                report(StateSync.Error<Boolean>(errMessage))
             }
             .check()
 
@@ -45,6 +45,6 @@ fun reqPermissions(context: Context, report: (EventsSync<Boolean>) -> Unit) {
         e.printStackTrace()
         val errMessage = context.resources.getString(R.string.error_in)+
                 " ReqPermissions.getPermissions: ${e.message}"
-        report(EventsSync.Error<Boolean>(errMessage))
+        report(StateSync.Error<Boolean>(errMessage))
     }
 }

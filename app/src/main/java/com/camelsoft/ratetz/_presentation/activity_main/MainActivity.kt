@@ -12,7 +12,7 @@ import com.camelsoft.ratetz.R
 import com.camelsoft.ratetz._presentation.utils.dialogs.showError
 import com.camelsoft.ratetz._presentation.utils.dialogs.showPermShouldGive
 import com.camelsoft.ratetz._presentation.utils.reqPermissions
-import com.camelsoft.ratetz.common.events.EventsSync
+import com.camelsoft.ratetz.common.state.StateSync
 import com.camelsoft.ratetz.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
@@ -53,13 +53,13 @@ class MainActivity : AppCompatActivity() {
     private fun getPermissions() {
         reqPermissions(weakContext.get()!!) { result ->
             when (result) {
-                is EventsSync.Success -> {
+                is StateSync.Success -> {
                     result.data.let {
                         if (!result.data)
                             showPermShouldGive(weakContext.get()!!) { finish() }
                     }
                 }
-                is EventsSync.Error -> {
+                is StateSync.Error -> {
                     val backupMessage = resources.getString(R.string.error_in)+
                             " ActivityMain.getPermissions: "+
                             resources.getString(R.string.error_text_unknown)

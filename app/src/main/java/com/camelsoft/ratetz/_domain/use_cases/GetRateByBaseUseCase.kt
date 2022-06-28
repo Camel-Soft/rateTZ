@@ -2,10 +2,10 @@ package com.camelsoft.ratetz._domain.use_cases
 
 import com.camelsoft.ratetz.R
 import com.camelsoft.ratetz._data.net.toRate
-import com.camelsoft.ratetz._domain.models.Rate
+import com.camelsoft.ratetz._domain.models.MRate
 import com.camelsoft.ratetz._domain.repository.RateRepository
 import com.camelsoft.ratetz.common.App
-import com.camelsoft.ratetz.common.events.EventsAsync
+import com.camelsoft.ratetz.common.state.StateAsync
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
@@ -15,17 +15,17 @@ import javax.inject.Inject
 class GetRateByBaseUseCase @Inject constructor(
     private val repository: RateRepository
 ) {
-    operator fun invoke(base: String): Flow<EventsAsync<Rate>> = flow {
+    operator fun invoke(base: String): Flow<StateAsync<MRate>> = flow {
         try {
-            emit(EventsAsync.Loading<Rate>())
+            emit(StateAsync.Loading<MRate>())
             val rate = repository.getRateByBase(base).toRate()
-            emit(EventsAsync.Success<Rate>(rate))
+            emit(StateAsync.Success<MRate>(rate))
         } catch(e: HttpException) {
             emit(
-                EventsAsync.Error<Rate>(e.localizedMessage ?: App.getAppContext().resources.getString(
+                StateAsync.Error<MRate>(e.localizedMessage ?: App.getAppContext().resources.getString(
                     R.string.error_text_unknown)))
         } catch(e: IOException) {
-            emit(EventsAsync.Error<Rate>(App.getAppContext().resources.getString(R.string.internet_lose)))
+            emit(StateAsync.Error<MRate>(App.getAppContext().resources.getString(R.string.internet_lose)))
         }
     }
 }
