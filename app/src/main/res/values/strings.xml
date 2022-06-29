@@ -4,10 +4,15 @@
     <string name="cancel">Отмена</string>
     <string name="exit">Выход</string>
     <string name="save">Сохранить</string>
-
+    <string name="apply">Применить</string>
     <string name="fav">Избранное</string>
     <string name="rate">Курс</string>
     <string name="sort">Сортировка</string>
+    <string name="sort_variant">Варианты сортировки</string>
+    <string name="sort_currency_asc">по Алфавиту по Возрастанию</string>
+    <string name="sort_currency_desc">по Алфавиту по Убыванию</string>
+    <string name="sort_rate_asc">по Значению по Возрастанию</string>
+    <string name="sort_rate_desc">по Значению по Убыванию</string>
     <string name="select">Избранное</string>
 
     <string name="error">Ошибка</string>

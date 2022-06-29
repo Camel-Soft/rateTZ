@@ -31,12 +31,13 @@ class MainActivity : AppCompatActivity() {
 
         weakContext = WeakReference<Context>(this)
 
-        setSupportActionBar(binding.mainToolbar)
         navController = findNavController(R.id.mainNavHostFragment)
+        setSupportActionBar(binding.mainToolbar)
         appBarConfiguration = AppBarConfiguration(setOf(R.id.fragGraphRate))
         setupActionBarWithNavController(navController, appBarConfiguration)
+        binding.mainToolbar.setNavigationOnClickListener { onBackPressed() }
 
-        getPermissions()
+        //getPermissions()
     }
 
     // Top menu item

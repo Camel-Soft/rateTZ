@@ -8,12 +8,58 @@
     tools:context="._presentation.activity_main.fragment_sort.FragmentSort">
 
     <TextView
+        android:id="@+id/textLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="15dp"
+        android:text="@string/sort_variant"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="@android:color/black"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RadioGroup
+        android:id="@+id/radioGroup"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:padding="10dp"
+        android:layout_margin="20dp"
+        app:layout_constraintBottom_toTopOf="@+id/btnApply"
+        app:layout_constraintTop_toBottomOf="@+id/textLabel">
+
+        <RadioButton
+            android:id="@+id/btnCurrencyAsc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sort_currency_asc" />
+
+        <RadioButton
+            android:id="@+id/btnCurrencyDesc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sort_currency_desc" />
+
+        <RadioButton
+            android:id="@+id/btnRateAsc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sort_rate_asc" />
+
+        <RadioButton
+            android:id="@+id/btnRateDesc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sort_rate_desc" />
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/btnApply"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="FragmentSort"
+        android:layout_margin="25dp"
+        android:text="@string/apply"
+        android:textAllCaps="false"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -7,16 +7,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.camelsoft.ratetz.R
 import com.camelsoft.ratetz._domain.models.*
+import com.camelsoft.ratetz._domain.utils.ISort
+import com.camelsoft.ratetz._domain.utils.SortMethod
 import com.camelsoft.ratetz._presentation.utils.dialogs.showError
 import com.camelsoft.ratetz.databinding.FragmentRateBinding
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
-import java.util.*
 
 @AndroidEntryPoint
 class FragmentRate : Fragment() {
@@ -39,30 +43,13 @@ class FragmentRate : Fragment() {
         catchState()
         refreshing()
         btnRefresh()
+        btnSort()
         chargeRv()
-
-
-
-
-        binding.btnSort.setOnClickListener {
-
-        }
-
-
-
-
-
-
-        viewModel.rate.observe(viewLifecycleOwner) {
-            invokeSpinner(it.toCurrencyList())
-            invokeRv(it.toRatesList())
-        }
-
-        getDefRate()
+        catchSortMethod()
     }
 
-    private fun invokeRv(list: List<MRateRv>) {
-        Collections.sort(list, rateDesc)
+    private fun invokeRv(list: List<MRateRv>, sortImpl: ISort) {
+        sortImpl.sort(list)
         adapterRv.submitList(list)
     }
 
@@ -88,19 +75,42 @@ class FragmentRate : Fragment() {
 
     private fun btnRefresh() {
         binding.btnRefresh.setOnClickListener {
-            if (binding.spinnerCurrency.selectedItem == null) getDefRate()
-            else viewModel.getRateByBase(binding.spinnerCurrency.selectedItem.toString())
+            if (binding.spinnerCurrency.selectedItem == null) viewModel.getRateByBase()
+            else {
+                viewModel.setBase(binding.spinnerCurrency.selectedItem.toString())
+                viewModel.getRateByBase()
+            }
         }
     }
 
-    private fun getDefRate() {
-        viewModel.getRateByBase("EUR")
-    }
 
     private fun refreshing() {
         binding.refreshLayout.setOnRefreshListener {
-            if (binding.spinnerCurrency.selectedItem == null) getDefRate()
-            else viewModel.getRateByBase(binding.spinnerCurrency.selectedItem.toString())
+            if (binding.spinnerCurrency.selectedItem == null) viewModel.getRateByBase()
+            else {
+                viewModel.setBase(binding.spinnerCurrency.selectedItem.toString())
+                viewModel.getRateByBase()
+            }
+        }
+    }
+
+    private fun btnSort() {
+        binding.btnSort.setOnClickListener {
+            val bundle = Bundle()
+            bundle.putParcelable("sortMethod", viewModel.sortMethod.value)
+            findNavController().navigate(R.id.action_fragGraphRate_to_fragGraphSort, bundle)
+        }
+    }
+
+    private fun catchSortMethod() {
+        setFragmentResultListener("FragmentSort_SortMethod") { key, bundle ->
+            val sortMethod: SortMethod? = bundle.getParcelable("sortMethod")
+            if (sortMethod != null) {
+                viewModel.setSortMethod(sortMethod)
+                viewModel.getRateByBase()
+            }
+            else
+                viewModel.getRateByBase()
         }
     }
 
@@ -109,6 +119,10 @@ class FragmentRate : Fragment() {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.fragmentRateState.collect { state ->
                 when(state) {
+                    is FragmentRateState.ProvideData -> {
+                        invokeSpinner(state.mRate.toCurrencyList())
+                        invokeRv(state.mRate.toRatesList(), state.sortImpl)
+                    }
                     is FragmentRateState.ShowError -> { showError(weakContext.get()!!, state.message) {} }
                     is FragmentRateState.ShowLoading -> { binding.refreshLayout.isRefreshing = state.isLoad }
                 }

@@ -6,6 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.camelsoft.ratetz._domain.models.MRate
 import com.camelsoft.ratetz._domain.use_cases.GetRateByBaseUseCase
+import com.camelsoft.ratetz._domain.utils.SortFactory
+import com.camelsoft.ratetz._domain.utils.SortMethod
+import com.camelsoft.ratetz.common.Const.DEFAULT_BASE
 import com.camelsoft.ratetz.common.state.StateAsync
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -20,19 +23,31 @@ class FragmentRateViewModel @Inject constructor(
     private val getRateByBaseUseCase: GetRateByBaseUseCase
 ) : ViewModel() {
 
+    private val _base = MutableLiveData<String>()
+    private val _sortMethod = MutableLiveData<SortMethod>()
+    val sortMethod: LiveData<SortMethod> = _sortMethod
+    private val _mRate = MutableLiveData<MRate>()
+
     private val _fragmentRateState =  Channel<FragmentRateState>()
     val fragmentRateState = _fragmentRateState.receiveAsFlow()
 
-    private val _rate = MutableLiveData<MRate>()
-    val rate: LiveData<MRate> = _rate
+    init {
+        _base.value = DEFAULT_BASE
+        _sortMethod.value = SortMethod.CURRENCY_ASC
+        getRateByBase()
+    }
 
-    fun getRateByBase(base: String) {
-        getRateByBaseUseCase(base = base).onEach { result ->
+    fun getRateByBase() {
+        getRateByBaseUseCase(base = _base.value!!).onEach { result ->
             when (result) {
                 is StateAsync.Success -> {
                     sendStateRateUi(FragmentRateState.ShowLoading(false))
                     result.data?.let {
-                        _rate.value = it
+                        _mRate.value = it
+                        sendStateRateUi(FragmentRateState.ProvideData(
+                            mRate = _mRate.value!!,
+                            SortFactory().getSortImpl(_sortMethod.value!!)
+                        ))
                     }
                 }
                 is StateAsync.Error -> {
@@ -47,6 +62,9 @@ class FragmentRateViewModel @Inject constructor(
             }
         }.launchIn(viewModelScope)
     }
+
+    fun setBase(base: String) { _base.value = base }
+    fun setSortMethod(sortMethod: SortMethod) { _sortMethod.value = sortMethod }
 
     private fun sendStateRateUi(fragmentRateState: FragmentRateState) {
         viewModelScope.launch {
