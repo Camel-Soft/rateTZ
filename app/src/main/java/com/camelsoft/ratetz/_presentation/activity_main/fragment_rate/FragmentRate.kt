@@ -44,8 +44,15 @@ class FragmentRate : Fragment() {
         refreshing()
         btnRefresh()
         btnSort()
+        btnFavorite()
         chargeRv()
         catchSortMethod()
+    }
+
+    private fun btnFavorite() {
+        binding.btnFavorite.setOnClickListener {
+            adapterRv.filter.filter("sdf")
+        }
     }
 
     private fun invokeRv(list: List<MRateRv>, sortImpl: ISort) {
@@ -55,15 +62,8 @@ class FragmentRate : Fragment() {
 
     private fun chargeRv() {
         adapterRv = FragmentRateAdapter()
-
-        adapterRv.setOnItemClickListener = { pos ->
-
-        }
-
-        adapterRv.setOnItemLongClickListener = { pos ->
-
-        }
-
+        adapterRv.setOnItemClickListener = { position -> viewModel.addFavorite(position) }
+        adapterRv.setOnItemLongClickListener = { position -> viewModel.rmFavorite(position) }
         binding.rvRate.layoutManager = LinearLayoutManager(weakContext.get()!!, RecyclerView.VERTICAL,false)
         binding.rvRate.adapter = adapterRv
     }
@@ -82,7 +82,6 @@ class FragmentRate : Fragment() {
             }
         }
     }
-
 
     private fun refreshing() {
         binding.refreshLayout.setOnRefreshListener {

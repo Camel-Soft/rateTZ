@@ -2,13 +2,15 @@ package com.camelsoft.ratetz._presentation.activity_main.fragment_rate
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Filter
+import android.widget.Filterable
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.camelsoft.ratetz.R
 import com.camelsoft.ratetz._domain.models.MRateRv
 import com.camelsoft.ratetz.databinding.FragmentRateItemBinding
 
-class FragmentRateAdapter : RecyclerView.Adapter<FragmentRateAdapter.ViewHolder>() {
+class FragmentRateAdapter : RecyclerView.Adapter<FragmentRateAdapter.ViewHolder>(), Filterable {
 
     private var list: List<MRateRv> = ArrayList()
     var setOnItemClickListener: ((Int) -> Unit)? = null
@@ -79,4 +81,22 @@ class FragmentRateAdapter : RecyclerView.Adapter<FragmentRateAdapter.ViewHolder>
     }
 
     override fun getItemCount() = list.size
+
+    override fun getFilter(): Filter = favoriteFilter
+
+    private val favoriteFilter: Filter = object : Filter() {
+        override fun performFiltering(charSequence: CharSequence?): FilterResults {
+            val filteredList = mutableListOf<MRateRv>()
+            list.forEach { mRateRv -> if (mRateRv.isSelected) filteredList.add(mRateRv) }
+            val results = FilterResults()
+            results.values = filteredList
+            return results
+        }
+
+        override fun publishResults(charSequence: CharSequence?, results: FilterResults?) {
+            list = ArrayList()
+            (list as ArrayList<MRateRv>).addAll(results?.values as Collection<MRateRv>)
+            notifyDataSetChanged()
+        }
+    }
 }

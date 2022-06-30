@@ -1,6 +1,6 @@
 package com.camelsoft.ratetz.common.di
 
-import com.camelsoft.ratetz._domain.repository.RateRepository
+import com.camelsoft.ratetz._data.repository.RateRepository
 import com.camelsoft.ratetz._domain.use_cases.GetRateByBaseUseCase
 import dagger.Module
 import dagger.Provides

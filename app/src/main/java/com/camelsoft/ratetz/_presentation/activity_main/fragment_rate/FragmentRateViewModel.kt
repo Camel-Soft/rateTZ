@@ -5,7 +5,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.camelsoft.ratetz._domain.models.MRate
+import com.camelsoft.ratetz._domain.use_cases.DeleteCurrencyUseCase
 import com.camelsoft.ratetz._domain.use_cases.GetRateByBaseUseCase
+import com.camelsoft.ratetz._domain.use_cases.InsertCurrencyUseCase
 import com.camelsoft.ratetz._domain.utils.SortFactory
 import com.camelsoft.ratetz._domain.utils.SortMethod
 import com.camelsoft.ratetz.common.Const.DEFAULT_BASE
@@ -20,7 +22,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FragmentRateViewModel @Inject constructor(
-    private val getRateByBaseUseCase: GetRateByBaseUseCase
+    private val getRateByBaseUseCase: GetRateByBaseUseCase,
+    private val insertCurrencyUseCase: InsertCurrencyUseCase,
+    private val deleteCurrencyUseCase: DeleteCurrencyUseCase
 ) : ViewModel() {
 
     private val _base = MutableLiveData<String>()
@@ -65,6 +69,20 @@ class FragmentRateViewModel @Inject constructor(
 
     fun setBase(base: String) { _base.value = base }
     fun setSortMethod(sortMethod: SortMethod) { _sortMethod.value = sortMethod }
+
+    fun addFavorite(position: Int) {
+        viewModelScope.launch {
+            insertCurrencyUseCase(_mRate.value?.rates?.get(position)!!.name)
+            getRateByBase()
+        }
+    }
+
+    fun rmFavorite(position: Int) {
+        viewModelScope.launch {
+            deleteCurrencyUseCase(_mRate.value?.rates?.get(position)!!.name)
+            getRateByBase()
+        }
+    }
 
     private fun sendStateRateUi(fragmentRateState: FragmentRateState) {
         viewModelScope.launch {
