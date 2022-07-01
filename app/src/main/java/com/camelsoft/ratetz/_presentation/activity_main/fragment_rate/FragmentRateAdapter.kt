@@ -87,9 +87,16 @@ class FragmentRateAdapter : RecyclerView.Adapter<FragmentRateAdapter.ViewHolder>
     private val favoriteFilter: Filter = object : Filter() {
         override fun performFiltering(charSequence: CharSequence?): FilterResults {
             val filteredList = mutableListOf<MRateRv>()
-            list.forEach { mRateRv -> if (mRateRv.isSelected) filteredList.add(mRateRv) }
             val results = FilterResults()
-            results.values = filteredList
+            if (charSequence == null || charSequence.isEmpty() || charSequence == "false")
+                results.values = list
+            else {
+                list.forEach { mRateRv ->
+                    if (mRateRv.isSelected)
+                        filteredList.add(mRateRv)
+                }
+                results.values = filteredList
+            }
             return results
         }
 

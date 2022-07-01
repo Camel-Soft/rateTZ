@@ -12,9 +12,6 @@
         android:label="@string/rate"
         tools:layout="@layout/fragment_rate" >
         <action
-            android:id="@+id/action_fragGraphRate_to_fragGraphFav"
-            app:destination="@id/fragGraphFav" />
-        <action
             android:id="@+id/action_fragGraphRate_to_fragGraphSort"
             app:destination="@id/fragGraphSort" />
     </fragment>
@@ -26,16 +23,6 @@
         tools:layout="@layout/fragment_sort" >
         <action
             android:id="@+id/action_fragGraphSort_to_fragGraphRate"
-            app:destination="@id/fragGraphRate" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/fragGraphFav"
-        android:name="com.camelsoft.ratetz._presentation.activity_main.fragment_fav.FragmentFav"
-        android:label="@string/fav"
-        tools:layout="@layout/fragment_fav" >
-        <action
-            android:id="@+id/action_fragGraphFav_to_fragGraphRate"
             app:destination="@id/fragGraphRate" />
     </fragment>
 

@@ -1,22 +1,15 @@
 package com.camelsoft.ratetz._presentation.activity_main.fragment_rate
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.camelsoft.ratetz._domain.models.MRate
 import com.camelsoft.ratetz._domain.use_cases.DeleteCurrencyUseCase
 import com.camelsoft.ratetz._domain.use_cases.GetRateByBaseUseCase
 import com.camelsoft.ratetz._domain.use_cases.InsertCurrencyUseCase
-import com.camelsoft.ratetz._domain.utils.SortFactory
 import com.camelsoft.ratetz._domain.utils.SortMethod
 import com.camelsoft.ratetz.common.Const.DEFAULT_BASE
 import com.camelsoft.ratetz.common.state.StateAsync
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,66 +20,87 @@ class FragmentRateViewModel @Inject constructor(
     private val deleteCurrencyUseCase: DeleteCurrencyUseCase
 ) : ViewModel() {
 
-    private val _base = MutableLiveData<String>()
-    private val _sortMethod = MutableLiveData<SortMethod>()
-    val sortMethod: LiveData<SortMethod> = _sortMethod
-    private val _mRate = MutableLiveData<MRate>()
+    private val _stateUI: MutableStateFlow<FragmentRateState> =
+        MutableStateFlow(
+            FragmentRateState(
+                mRateUiState = FragmentRateUiState.ShowLoading,
+                base = DEFAULT_BASE,
+                sortMethod = SortMethod.CURRENCY_ASC,
+                isFavorite = false
+            )
+        )
 
-    private val _fragmentRateState =  Channel<FragmentRateState>()
-    val fragmentRateState = _fragmentRateState.receiveAsFlow()
+    val stateUI = _stateUI.asStateFlow()
 
     init {
-        _base.value = DEFAULT_BASE
-        _sortMethod.value = SortMethod.CURRENCY_ASC
         getRateByBase()
     }
 
     fun getRateByBase() {
-        getRateByBaseUseCase(base = _base.value!!).onEach { result ->
+        getRateByBaseUseCase(base = stateUI.value.base).onEach { result ->
             when (result) {
                 is StateAsync.Success -> {
-                    sendStateRateUi(FragmentRateState.ShowLoading(false))
+                    //sendStateRateUi(FragmentRateStateOLD.ShowLoading(false))
+                    _stateUI.value = _stateUI.value.copy(
+                        mRateUiState = FragmentRateUiState.ShowLoading
+                    )
+
                     result.data?.let {
-                        _mRate.value = it
-                        sendStateRateUi(FragmentRateState.ProvideData(
-                            mRate = _mRate.value!!,
-                            SortFactory().getSortImpl(_sortMethod.value!!)
-                        ))
+                        _stateUI.value = _stateUI.value.copy(
+                            mRateUiState = FragmentRateUiState.Success(data = it)
+                        )
                     }
                 }
                 is StateAsync.Error -> {
-                    sendStateRateUi(FragmentRateState.ShowLoading(false))
-                    result.message?.let {
-                        sendStateRateUi(FragmentRateState.ShowError(it))
-                    }
+                    _stateUI.value = _stateUI.value.copy(
+                        mRateUiState = FragmentRateUiState.ShowError(result.message)
+                    )
                 }
                 is StateAsync.Loading -> {
-                    sendStateRateUi(FragmentRateState.ShowLoading(true))
+                    _stateUI.value = _stateUI.value.copy(
+                        mRateUiState = FragmentRateUiState.ShowLoading
+                    )
                 }
             }
         }.launchIn(viewModelScope)
     }
 
-    fun setBase(base: String) { _base.value = base }
-    fun setSortMethod(sortMethod: SortMethod) { _sortMethod.value = sortMethod }
+    fun setBase(base: String) {
+        _stateUI.value = _stateUI.value.copy(
+            base = base
+        )
+        getRateByBase()
+    }
+
+    fun setSortMethod(sortMethod: SortMethod) {
+        _stateUI.value = _stateUI.value.copy(
+            sortMethod = sortMethod
+        )
+    }
+
+    fun setIsFavorite(isFavorite: Boolean) {
+        _stateUI.value = _stateUI.value.copy(
+            isFavorite = isFavorite
+        )
+    }
 
     fun addFavorite(position: Int) {
         viewModelScope.launch {
-            insertCurrencyUseCase(_mRate.value?.rates?.get(position)!!.name)
-            getRateByBase()
+            val mRateUiState = stateUI.value.mRateUiState
+            if (mRateUiState is FragmentRateUiState.Success) {
+                insertCurrencyUseCase(mRateUiState.data.rates[position].name)
+                getRateByBase()
+            }
         }
     }
 
     fun rmFavorite(position: Int) {
         viewModelScope.launch {
-            deleteCurrencyUseCase(_mRate.value?.rates?.get(position)!!.name)
-            getRateByBase()
-        }
-    }
-
-    private fun sendStateRateUi(fragmentRateState: FragmentRateState) {
-        viewModelScope.launch {
-            _fragmentRateState.send(fragmentRateState)
+            val mRateUiState = stateUI.value.mRateUiState
+            if (mRateUiState is FragmentRateUiState.Success) {
+                deleteCurrencyUseCase(mRateUiState.data.rates[position].name)
+                getRateByBase()
+            }
         }
     }
 }
