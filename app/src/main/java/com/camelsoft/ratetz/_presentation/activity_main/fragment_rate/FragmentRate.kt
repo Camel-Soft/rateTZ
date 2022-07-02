@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
@@ -30,8 +29,6 @@ class FragmentRate : Fragment() {
     private lateinit var weakContext: WeakReference<Context>
     private val viewModel: FragmentRateViewModel by viewModels()
     private lateinit var adapterRv: FragmentRateAdapter
-    private var sortMethod = SortMethod.CURRENCY_ASC
-    private var isFavorite = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -47,8 +44,6 @@ class FragmentRate : Fragment() {
         catchState()
         refreshing()
         btnRefresh()
-        btnSort()
-        btnFavorite()
         chargeRv()
         catchSortMethod()
     }
@@ -63,50 +58,37 @@ class FragmentRate : Fragment() {
     private fun chargeRv() {
         adapterRv = FragmentRateAdapter()
         adapterRv.setOnItemClickListener = { position ->
-            if (!isFavorite) viewModel.addFavorite(position) else showOnlyFullList()
+            viewModel.addFavorite(adapterRv.getList()[position].name)
         }
         adapterRv.setOnItemLongClickListener = { position ->
-            if (!isFavorite) viewModel.rmFavorite(position) else showOnlyFullList()
+            viewModel.rmFavorite(adapterRv.getList()[position].name)
         }
-        binding.rvRate.layoutManager = LinearLayoutManager(weakContext.get()!!, RecyclerView.VERTICAL,false)
+        binding.rvRate.layoutManager =
+            LinearLayoutManager(weakContext.get()!!, RecyclerView.VERTICAL,false)
         binding.rvRate.adapter = adapterRv
     }
 
     private fun invokeSpinner(list: List<String>) {
-        val adapter = ArrayAdapter(weakContext.get()!!, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, list)
+        val adapter = ArrayAdapter(weakContext.get()!!,
+            androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, list)
         binding.spinnerCurrency.adapter = adapter
     }
 
     private fun btnRefresh() {
         binding.btnRefresh.setOnClickListener {
-            if (!isFavorite) {
-                if (binding.spinnerCurrency.selectedItem == null) viewModel.getRateByBase()
-                else viewModel.setBase(binding.spinnerCurrency.selectedItem.toString())
-            }
-            else
-                showOnlyFullList()
+            if (binding.spinnerCurrency.selectedItem == null) viewModel.getRateByBase()
+            else viewModel.setBase(binding.spinnerCurrency.selectedItem.toString())
         }
-    }
-
-    private fun showOnlyFullList() {
-        Toast.makeText(weakContext.get()!!, resources.getString(R.string.only_full_list), Toast.LENGTH_SHORT).show()
     }
 
     private fun refreshing() {
         binding.refreshLayout.setOnRefreshListener {
-            if (!isFavorite) {
-                if (binding.spinnerCurrency.selectedItem == null) viewModel.getRateByBase()
-                else viewModel.setBase(binding.spinnerCurrency.selectedItem.toString())
-            }
-            else {
-                binding.refreshLayout.isRefreshing = false
-                showOnlyFullList()
-            }
-
+            if (binding.spinnerCurrency.selectedItem == null) viewModel.getRateByBase()
+            else viewModel.setBase(binding.spinnerCurrency.selectedItem.toString())
         }
     }
 
-    private fun btnSort() {
+    private fun setBtnSortClickListener(sortMethod: SortMethod) {
         binding.btnSort.setOnClickListener {
             val bundle = Bundle()
             bundle.putParcelable("sortMethod", sortMethod)
@@ -121,7 +103,7 @@ class FragmentRate : Fragment() {
         }
     }
 
-    private fun btnFavorite() {
+    private fun setBtnFavoriteClickListener(isFavorite: Boolean) {
         binding.btnFavorite.setOnClickListener {
             if (isFavorite) {
                 viewModel.setIsFavorite(false)
@@ -146,10 +128,13 @@ class FragmentRate : Fragment() {
             if (state.mRateUiState is FragmentRateUiState.Success) {
                 binding.refreshLayout.isRefreshing = false
                 invokeSpinner(state.mRateUiState.data.toCurrencyList())
-                invokeRv(state.mRateUiState.data.toRatesList(), SortFactory().getSortImpl(state.sortMethod), state.isFavorite)
+                invokeRv(
+                    state.mRateUiState.data.toRatesList(),
+                    SortFactory().getSortImpl(state.sortMethod),
+                    state.isFavorite)
+                setBtnSortClickListener(sortMethod = state.sortMethod)
+                setBtnFavoriteClickListener(isFavorite = state.isFavorite)
             }
-            sortMethod = state.sortMethod
-            isFavorite = state.isFavorite
         }
     }
 }

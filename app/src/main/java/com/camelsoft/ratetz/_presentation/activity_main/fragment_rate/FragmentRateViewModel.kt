@@ -84,23 +84,17 @@ class FragmentRateViewModel @Inject constructor(
         )
     }
 
-    fun addFavorite(position: Int) {
+    fun addFavorite(name: String) {
         viewModelScope.launch {
-            val mRateUiState = stateUI.value.mRateUiState
-            if (mRateUiState is FragmentRateUiState.Success) {
-                insertCurrencyUseCase(mRateUiState.data.rates[position].name)
-                getRateByBase()
-            }
+            insertCurrencyUseCase(name)
+            getRateByBase()
         }
     }
 
-    fun rmFavorite(position: Int) {
+    fun rmFavorite(name: String) {
         viewModelScope.launch {
-            val mRateUiState = stateUI.value.mRateUiState
-            if (mRateUiState is FragmentRateUiState.Success) {
-                deleteCurrencyUseCase(mRateUiState.data.rates[position].name)
-                getRateByBase()
-            }
+            deleteCurrencyUseCase(name)
+            getRateByBase()
         }
     }
 }
